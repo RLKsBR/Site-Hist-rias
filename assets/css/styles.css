@@ -86,22 +86,24 @@ img {
 }
 
 .brand-mark {
-  width: 34px;
+  width: 28px;
   height: 28px;
-  border: 1px solid rgba(226, 74, 82, 0.62);
-  border-radius: 6px;
+  border: 0;
+  border-radius: 0;
   display: inline-grid;
   place-items: center;
   color: var(--accent-strong);
-  font-family: system-ui, sans-serif;
+  font-family: Georgia, "Times New Roman", serif;
   font-size: 0;
-  font-weight: 800;
-  letter-spacing: 0.04em;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 0 14px rgba(226, 74, 82, 0.22);
 }
 
 .brand-mark::before {
-  content: "AV";
-  font-size: 0.72rem;
+  content: "A";
+  font-size: 1.45rem;
+  transform: skewX(-7deg);
 }
 
 .menu-toggle {
