@@ -85,25 +85,11 @@ img {
   text-decoration: none;
 }
 
-.brand-mark {
+.brand-logo {
   width: 28px;
   height: 28px;
-  border: 0;
-  border-radius: 0;
-  display: inline-grid;
-  place-items: center;
-  color: var(--accent-strong);
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 0;
-  font-weight: 700;
-  line-height: 1;
-  text-shadow: 0 0 14px rgba(226, 74, 82, 0.22);
-}
-
-.brand-mark::before {
-  content: "A";
-  font-size: 1.45rem;
-  transform: skewX(-7deg);
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .menu-toggle {
@@ -288,18 +274,62 @@ h3 {
   padding: 18px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  background:
-    linear-gradient(180deg, rgba(17, 16, 15, 0.12), rgba(17, 16, 15, 0.92)),
-    linear-gradient(135deg, rgba(184, 50, 58, 0.3), rgba(198, 161, 91, 0.08)),
-    var(--surface);
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
   box-shadow: 0 12px 34px rgba(0, 0, 0, 0.22);
   text-decoration: none;
   transition: transform 180ms ease, border-color 180ms ease;
 }
 
+.work-card::before,
+.work-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.work-card::before {
+  background: var(--cover) center / cover no-repeat;
+  opacity: 0.72;
+  transition: transform 220ms ease, opacity 180ms ease;
+}
+
+.work-card::after {
+  background:
+    linear-gradient(180deg, rgba(17, 16, 15, 0.05), rgba(17, 16, 15, 0.92)),
+    linear-gradient(135deg, rgba(184, 50, 58, 0.24), rgba(0, 0, 0, 0.18));
+}
+
 .work-card:hover {
   transform: translateY(-3px);
   border-color: rgba(226, 74, 82, 0.6);
+}
+
+.work-card:hover::before {
+  transform: scale(1.03);
+  opacity: 0.82;
+}
+
+.work-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.cover-a-hora-vermelha {
+  --cover: url("../img/capa-a-hora-vermelha.png");
+}
+
+.cover-o-ultimo-dia {
+  --cover: url("../img/capa-o-ultimo-dia.png");
+}
+
+.cover-cronicas {
+  --cover: url("../img/capa-cronicas.png");
+}
+
+.cover-checkpoint-zumbi {
+  --cover: url("../img/capa-checkpoint-zumbi.png");
 }
 
 .work-card small,
@@ -369,6 +399,21 @@ h3 {
   background:
     linear-gradient(180deg, rgba(184, 50, 58, 0.08), transparent),
     var(--bg-soft);
+}
+
+.work-hero-grid {
+  display: grid;
+  gap: 22px;
+  align-items: end;
+}
+
+.work-cover {
+  width: min(100%, 260px);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  object-fit: cover;
+  aspect-ratio: 2 / 3;
 }
 
 .work-layout {
@@ -500,6 +545,10 @@ h3 {
   .two-col,
   .work-layout {
     grid-template-columns: minmax(0, 1fr) 310px;
+  }
+
+  .work-hero-grid {
+    grid-template-columns: minmax(0, 1fr) 220px;
   }
 
   .footer-inner {
