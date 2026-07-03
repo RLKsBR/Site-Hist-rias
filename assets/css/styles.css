@@ -145,11 +145,11 @@ img {
 
 @media (max-width: 719px) {
   .header-inner {
-    padding-top: 22px;
+    padding-top: 34px;
   }
 
   .site-nav {
-    inset: 69px 16px auto 16px;
+    inset: 81px 16px auto 16px;
   }
 }
 
