@@ -840,9 +840,14 @@ h3 {
 
   .reader-cover-panel {
     grid-column: 2;
-    grid-row: 1 / span 3;
+    grid-row: 1 / span 2;
     position: sticky;
     top: 94px;
+  }
+
+  .reader .chapter-rating,
+  .reader .chapter-nav {
+    grid-column: 1 / -1;
   }
 
   .footer-inner {
