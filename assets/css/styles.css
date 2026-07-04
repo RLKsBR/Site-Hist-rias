@@ -477,7 +477,17 @@ h3 {
 .update-list,
 .chapter-list {
   display: grid;
-  gap: 12px;
+  gap: 0;
+  padding: 18px;
+  border: 1px solid rgba(198, 161, 91, 0.2);
+  border-radius: var(--radius);
+  background:
+    linear-gradient(180deg, rgba(16, 9, 8, 0.68), rgba(16, 9, 8, 0.9)),
+    linear-gradient(90deg, rgba(8, 3, 3, 0.76), rgba(92, 9, 12, 0.18), rgba(8, 3, 3, 0.78)),
+    url("../img/bg-obras-mobile.jpg") center / cover no-repeat,
+    rgba(31, 27, 25, 0.72);
+  box-shadow: 0 18px 55px rgba(0, 0, 0, 0.26);
+  overflow: hidden;
 }
 
 .update-item,
@@ -485,7 +495,7 @@ h3 {
   display: grid;
   gap: 4px;
   padding: 15px 0;
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid rgba(198, 161, 91, 0.22);
 }
 
 .update-item:last-child,
@@ -936,6 +946,15 @@ h3 {
       linear-gradient(90deg, rgba(9, 4, 4, 0.9), rgba(70, 6, 8, 0.16), rgba(9, 4, 4, 0.9)),
       url("../img/bg-obras-desktop.jpg") center top / cover no-repeat,
       #100908;
+  }
+
+  .update-list,
+  .chapter-list {
+    background:
+      linear-gradient(180deg, rgba(16, 9, 8, 0.62), rgba(16, 9, 8, 0.88)),
+      linear-gradient(90deg, rgba(8, 3, 3, 0.76), rgba(92, 9, 12, 0.14), rgba(8, 3, 3, 0.76)),
+      url("../img/bg-obras-desktop.jpg") center / cover no-repeat,
+      rgba(31, 27, 25, 0.72);
   }
 
   .works-grid {
