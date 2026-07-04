@@ -1,7 +1,7 @@
 {
-  "versionCode": 11,
-  "versionName": "1.7.1",
-  "apkUrl": "https://rlksbr.github.io/ArquivoVermelho/downloads/app/arquivo-vermelho-1.7.1.apk",
-  "downloadPageUrl": "https://rlksbr.github.io/ArquivoVermelho/downloads/app/arquivo-vermelho-1.7.1.apk",
-  "notes": "Versao de teste para validar a atualizacao direta a partir do app 1.7."
+  "versionCode": 12,
+  "versionName": "1.7.2",
+  "apkUrl": "https://rlksbr.github.io/ArquivoVermelho/downloads/app/arquivo-vermelho-1.7.2.apk",
+  "downloadPageUrl": "https://rlksbr.github.io/ArquivoVermelho/downloads/app/arquivo-vermelho-1.7.2.apk",
+  "notes": "Melhora o fluxo de atualizacao: depois do download, o app tenta abrir o instalador automaticamente."
 }
