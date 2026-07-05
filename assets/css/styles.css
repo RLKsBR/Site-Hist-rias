@@ -712,6 +712,80 @@ h3 {
   gap: 10px;
 }
 
+.pdf-toolbar .button {
+  color: #fff3e6;
+}
+
+.pdf-toolbar [data-pdf-previous] {
+  border-color: #2f5f73;
+  background: #2f5f73;
+}
+
+.pdf-toolbar [data-pdf-previous]:hover {
+  border-color: #3a7188;
+  background: #3a7188;
+}
+
+.pdf-toolbar [data-pdf-next] {
+  border-color: #5f7f2a;
+  background: #5f7f2a;
+}
+
+.pdf-toolbar [data-pdf-next]:hover {
+  border-color: #739936;
+  background: #739936;
+}
+
+.reader-inline-nav {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.chapter-nav .chapter-button {
+  color: #fff3e6;
+}
+
+.chapter-nav .chapter-button-previous {
+  border-color: #3b5267;
+  background: #3b5267;
+}
+
+.chapter-nav .chapter-button-previous:hover {
+  border-color: #4a6680;
+  background: #4a6680;
+}
+
+.chapter-nav .chapter-button-back {
+  border-color: #594338;
+  background: #594338;
+}
+
+.chapter-nav .chapter-button-back:hover {
+  border-color: #6c5144;
+  background: #6c5144;
+}
+
+.chapter-nav .chapter-button-next {
+  border-color: #8f2f3d;
+  background: #8f2f3d;
+}
+
+.chapter-nav .chapter-button-next:hover {
+  border-color: #aa3a49;
+  background: #aa3a49;
+}
+
+.chapter-nav .button.disabled,
+.chapter-nav .button:disabled {
+  border-color: #3a2925;
+  background: #211715;
+  color: #fff3e6;
+}
+
 .speech-controls {
   display: flex;
   flex-wrap: wrap;
