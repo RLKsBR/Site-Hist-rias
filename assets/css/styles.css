@@ -1239,6 +1239,29 @@ h3 {
     padding-left: 0;
   }
 
+  body.has-library-sidebar .site-header .brand {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 24;
+    width: 286px;
+    min-height: 77px;
+    padding: 9px 14px;
+    border-right: 1px solid rgba(198, 161, 91, 0.16);
+    border-bottom: 1px solid rgba(198, 161, 91, 0.16);
+    background: rgba(17, 16, 15, 0.92);
+    backdrop-filter: blur(14px);
+  }
+
+  body.has-library-sidebar .header-inner {
+    min-height: 77px;
+    padding-left: 0;
+  }
+
+  body.has-library-sidebar .site-nav {
+    margin-left: auto;
+  }
+
   .desktop-library-sidebar {
     position: fixed;
     inset: 77px auto 0 0;
