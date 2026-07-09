@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Painel local | Arquivo Vermelho</title>
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Ferramenta local</p>
+        <h1>Painel do Arquivo Vermelho</h1>
+        <p>Adicione ou substitua PDFs no repositório local e atualize as páginas principais sem usar login, token público ou backend.</p>
+      </div>
+      <button class="button" type="button" data-pick-root>Selecionar pasta do site</button>
+    </header>
+
+    <section class="status-card" data-status>
+      <strong>Pasta do site ainda não selecionada.</strong>
+      <span>Escolha a pasta raiz do repositório, a que contém index.html, assets, capitulos, downloads e obras.</span>
+    </section>
+
+    <section class="grid">
+      <form class="panel" data-admin-form>
+        <h2>Publicação</h2>
+
+        <label>
+          Ação
+          <select name="mode" data-mode>
+            <option value="add">Adicionar novo capítulo/PDF</option>
+            <option value="replace">Substituir PDF existente</option>
+          </select>
+        </label>
+
+        <label>
+          Obra
+          <select name="work" data-work></select>
+        </label>
+
+        <label data-version-row hidden>
+          Versão
+          <select name="version" data-version></select>
+        </label>
+
+        <div class="fields-add" data-add-fields>
+          <div class="two">
+            <label>
+              Número
+              <input name="number" type="number" min="1" step="1" placeholder="6">
+            </label>
+
+            <label>
+              Título
+              <input name="title" type="text" placeholder="Nome do capítulo">
+            </label>
+          </div>
+
+          <label>
+            Resumo curto
+            <input name="summary" type="text" placeholder="Publicação em PDF gratuito para leitura no Arquivo Vermelho.">
+          </label>
+        </div>
+
+        <label class="fields-replace" data-replace-fields hidden>
+          Caminho do PDF existente
+          <input name="replacePath" type="text" placeholder="downloads/a-hora-vermelha/capitulo-05-me-destranca.pdf">
+        </label>
+
+        <label>
+          Arquivo PDF
+          <input name="pdf" type="file" accept="application/pdf,.pdf" required>
+        </label>
+
+        <fieldset class="checks" data-add-options>
+          <legend>Atualizações automáticas</legend>
+          <label><input name="updateWorkPage" type="checkbox" checked> Atualizar página da obra</label>
+          <label><input name="updateHome" type="checkbox" checked> Atualizar home em "Últimas atualizações"</label>
+          <label><input name="updateSidebar" type="checkbox" checked> Atualizar barra lateral desktop</label>
+          <label><input name="updateSitemap" type="checkbox" checked> Atualizar sitemap.xml</label>
+          <label><input name="updatePrevious" type="checkbox" checked> Liberar botão "Próximo capítulo" no capítulo anterior</label>
+        </fieldset>
+
+        <div class="actions">
+          <button class="button secondary" type="button" data-preview>Gerar prévia</button>
+          <button class="button" type="submit">Aplicar no repositório</button>
+        </div>
+      </form>
+
+      <aside class="panel">
+        <h2>Prévia</h2>
+        <div class="preview" data-preview-box>
+          <p>Preencha os dados e clique em "Gerar prévia".</p>
+        </div>
+      </aside>
+    </section>
+
+    <section class="panel">
+      <h2>Registro</h2>
+      <ol class="log" data-log></ol>
+    </section>
+  </main>
+
+  <script src="admin.js"></script>
+</body>
+</html>

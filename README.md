@@ -39,6 +39,23 @@ Abra o arquivo `obras/nome-da-obra/index.html` e edite:
 
 Quando adicionar um PDF, coloque o arquivo em `downloads/nome-da-obra/` e troque o botão desativado por um link real.
 
+## Painel local para PDFs
+
+Existe um painel local em `admin-local/index.html` para acelerar a publicação de PDFs.
+
+Ele roda no navegador, pede acesso à pasta local do repositório e pode:
+
+- adicionar um PDF novo;
+- substituir um PDF existente;
+- criar a página HTML do capítulo;
+- atualizar a página oficial da obra;
+- atualizar a seção "Últimas atualizações" da home;
+- atualizar a barra lateral desktop;
+- atualizar `sitemap.xml`;
+- tentar liberar o botão "Próximo capítulo" no capítulo anterior.
+
+O painel não publica no GitHub sozinho. Depois de usar, revise o site localmente e faça commit/push.
+
 ## Como adicionar um capitulo
 
 1. Copie uma página existente em `capitulos/`, por exemplo `capitulos/a-hora-vermelha-capitulo-01.html`.
