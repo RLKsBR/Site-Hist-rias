@@ -29,6 +29,8 @@ const renderViewer = async (viewer) => {
   let currentUtterance = null;
   let speechRunId = 0;
   let speechTimer = null;
+  let nextChapterTimer = null;
+  let speechFinished = false;
   let zoom = 1;
   const speechProgressKey = `arquivoVermelho.speechProgress.v1:${new URL(source, window.location.href).pathname}`;
   const speechRateBase = 1.25;
@@ -250,7 +252,7 @@ const renderViewer = async (viewer) => {
     return pause;
   };
 
-  const pushSpeechSegment = (chunks, text, pause) => {
+  const pushSpeechSegment = (chunks, text, pause, page) => {
     const cleanText = text.replace(/\s+/g, " ").trim();
 
     if (!cleanText) {
@@ -261,7 +263,7 @@ const renderViewer = async (viewer) => {
     }
 
     if (cleanText.length <= 1400) {
-      chunks.push({ text: cleanText, pause });
+      chunks.push({ text: cleanText, pause, page });
       return;
     }
 
@@ -271,7 +273,7 @@ const renderViewer = async (viewer) => {
     words.forEach((word) => {
       const next = current ? `${current} ${word}` : word;
       if (next.length > 1200) {
-        chunks.push({ text: current, pause: 180 });
+        chunks.push({ text: current, pause: 180, page });
         current = word;
         return;
       }
@@ -280,11 +282,11 @@ const renderViewer = async (viewer) => {
     });
 
     if (current) {
-      chunks.push({ text: current, pause });
+      chunks.push({ text: current, pause, page });
     }
   };
 
-  const splitText = (text) => {
+  const splitText = (text, page) => {
     const chunks = [];
     const lines = text.replace(/\r/g, "").split("\n");
 
@@ -300,7 +302,7 @@ const renderViewer = async (viewer) => {
 
       const segments = cleanLine.match(/[^,;.!?:—–-]+[,;.!?:—–-]?/g) || [cleanLine];
       segments.forEach((segment, index) => {
-        pushSpeechSegment(chunks, segment, getPauseAfterSegment(segment, index === segments.length - 1));
+        pushSpeechSegment(chunks, segment, getPauseAfterSegment(segment, index === segments.length - 1), page);
       });
     });
 
@@ -334,7 +336,11 @@ const renderViewer = async (viewer) => {
       lines.push(currentLine.join(" ").replace(/\s+/g, " ").trim());
     }
 
-    return lines.filter(Boolean).join("\n");
+    return lines.filter(Boolean).filter((line) => {
+      const compact = line.replace(/\s+/g, " ").trim();
+      const pageMarker = /(?:p[aá]g(?:ina)?\.?|page)\s*\d+/i;
+      return !(pageMarker.test(compact) && compact.length <= 180);
+    }).join("\n");
   };
 
   const extractPdfText = async () => {
@@ -351,16 +357,44 @@ const renderViewer = async (viewer) => {
       const pageText = getPageText(content.items);
 
       if (pageText) {
-        pages.push(pageText);
+        pages.push({ number: i, text: pageText });
       }
     }
 
-    extractedText = pages.join("\n\n");
-    speechChunks = splitText(extractedText);
+    extractedText = pages.map((page) => page.text).join("\n\n");
+    speechChunks = pages.flatMap((page) => splitText(page.text, page.number));
     return extractedText;
   };
 
-  const speakChunk = (runId) => {
+  const finishSpeech = () => {
+    if (speechFinished) {
+      return;
+    }
+
+    speechFinished = true;
+    currentUtterance = null;
+    saveSpeechProgress(speechChunks.length, speechChunks.length);
+
+    const nextChapter = viewer.querySelector(".reader-inline-nav .chapter-button-next[href]:not(.disabled)");
+    if (!nextChapter) {
+      setSpeechStatus("Leitura concluída.");
+      return;
+    }
+
+    setSpeechStatus("Leitura concluída. Abrindo o próximo capítulo...");
+    nextChapterTimer = window.setTimeout(() => {
+      window.location.assign(nextChapter.href);
+    }, 900);
+  };
+
+  const syncPageToSpeech = async (index) => {
+    const targetPage = speechChunks[index]?.page;
+    if (targetPage && pdf && targetPage !== pageNumber) {
+      await renderPage(targetPage);
+    }
+  };
+
+  const speakChunk = async (runId) => {
     window.clearTimeout(speechTimer);
 
     if (runId !== speechRunId) {
@@ -368,13 +402,17 @@ const renderViewer = async (viewer) => {
     }
 
     if (!speechChunks.length || speechIndex >= speechChunks.length) {
-      currentUtterance = null;
-      saveSpeechProgress(speechChunks.length, speechChunks.length);
-      setSpeechStatus("Leitura concluída.");
+      finishSpeech();
       return;
     }
 
     const chunk = speechChunks[speechIndex];
+    await syncPageToSpeech(speechIndex);
+
+    if (runId !== speechRunId) {
+      return;
+    }
+
     saveSpeechProgress(speechIndex, speechChunks.length);
     currentUtterance = new SpeechSynthesisUtterance(chunk.text);
     currentUtterance.lang = document.documentElement.lang || "pt-BR";
@@ -389,7 +427,9 @@ const renderViewer = async (viewer) => {
       speechIndex += 1;
       saveSpeechProgress(speechIndex, speechChunks.length);
       setSpeechStatus(`Lendo parte ${Math.min(speechIndex + 1, speechChunks.length)} de ${speechChunks.length}.`);
-      speechTimer = window.setTimeout(() => speakChunk(runId), getScaledPause(chunk.pause));
+      speechTimer = window.setTimeout(() => {
+        void speakChunk(runId);
+      }, getScaledPause(chunk.pause));
     };
 
     currentUtterance.onerror = () => {
@@ -426,6 +466,10 @@ const renderViewer = async (viewer) => {
 
       if (hasNativeSpeech) {
         applyNativeSpeechRate();
+        const targetPage = speechChunks[speechIndex]?.page;
+        if (targetPage && targetPage !== pageNumber) {
+          queueRender(targetPage);
+        }
         nativeBridge.speak(JSON.stringify({
           progressKey: speechProgressKey,
           startIndex: speechIndex,
@@ -444,7 +488,18 @@ const renderViewer = async (viewer) => {
         return;
       }
 
-      saveSpeechProgress(Number(detail.index), Number(detail.total));
+      const index = Number(detail.index);
+      const total = Number(detail.total);
+      if (Number.isFinite(total) && index >= total) {
+        finishSpeech();
+        return;
+      }
+
+      saveSpeechProgress(index, total);
+      const targetPage = speechChunks[index]?.page;
+      if (targetPage && targetPage !== pageNumber) {
+        queueRender(targetPage);
+      }
     });
 
     const changeSpeechRate = (direction) => {
@@ -473,6 +528,8 @@ const renderViewer = async (viewer) => {
         speechRunId += 1;
         const runId = speechRunId;
         window.clearTimeout(speechTimer);
+        window.clearTimeout(nextChapterTimer);
+        speechFinished = false;
         if (hasNativeSpeech && typeof nativeBridge.stop === "function") {
           nativeBridge.stop();
         }
@@ -535,6 +592,8 @@ const renderViewer = async (viewer) => {
         speechRunId += 1;
         const runId = speechRunId;
         window.clearTimeout(speechTimer);
+        window.clearTimeout(nextChapterTimer);
+        speechFinished = false;
         if (hasNativeSpeech && typeof nativeBridge.stop === "function") {
           nativeBridge.stop();
         }
@@ -570,6 +629,7 @@ const renderViewer = async (viewer) => {
     window.addEventListener("beforeunload", () => {
       speechRunId += 1;
       window.clearTimeout(speechTimer);
+      window.clearTimeout(nextChapterTimer);
       if (hasNativeSpeech && typeof nativeBridge.stop === "function") {
         nativeBridge.stop();
       }
