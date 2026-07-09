@@ -749,6 +749,15 @@ h3 {
   margin-top: 2px;
 }
 
+.pdf-page-navigation,
+.pdf-zoom-controls {
+  flex-basis: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
 .chapter-nav .chapter-button {
   color: #fff3e6;
 }

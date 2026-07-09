@@ -163,6 +163,20 @@ const renderViewer = async (viewer) => {
       return;
     }
 
+    const chapterNavigation = toolbar.querySelector(".reader-inline-nav");
+    const pageCounter = toolbar.querySelector(".pdf-page-count");
+    const pageNavigation = document.createElement("div");
+    pageNavigation.className = "pdf-page-navigation";
+    pageNavigation.append(previousButton, pageCounter, nextButton);
+
+    const zoomControls = document.createElement("div");
+    zoomControls.className = "pdf-zoom-controls";
+
+    if (chapterNavigation) {
+      toolbar.prepend(chapterNavigation);
+    }
+    toolbar.append(pageNavigation, zoomControls);
+
     const zoomOutButton = document.createElement("button");
     zoomOutButton.className = "button secondary";
     zoomOutButton.type = "button";
@@ -181,7 +195,7 @@ const renderViewer = async (viewer) => {
     fullscreenButton.dataset.pdfFullscreen = "";
     fullscreenButton.textContent = "Tela cheia";
 
-    toolbar.append(zoomOutButton, zoomInButton, fullscreenButton);
+    zoomControls.append(zoomOutButton, zoomInButton, fullscreenButton);
 
     zoomOutButton.addEventListener("click", () => {
       zoom = Math.max(0.75, Number((zoom - 0.15).toFixed(2)));
