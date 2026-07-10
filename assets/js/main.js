@@ -189,8 +189,8 @@ if (!nativeApp) {
         ['Capítulo 1: Prólogo', 'capitulos/checkpoint-zumbi-capitulo-01-prologo.html'],
         ['Capítulo 2: Carlos e a Ligação do Coronel', 'capitulos/checkpoint-zumbi-capitulo-02-carlos-e-a-ligacao-do-coronel.html'],
         ['Capítulo 3: Cigarros, Magão, Dona Célia e João', 'capitulos/checkpoint-zumbi-capitulo-03-cigarros-magao-dona-celia-e-joao.html'],
-        ['Capítulo 4: Cristina Sem Internet e Sem Plano', 'capitulos/checkpoint-zumbi-capitulo-04-cristina-sem-internet-e-sem-plano.html']
-      ]
+        ['Capítulo 4: Cristina Sem Internet e Sem Plano', 'capitulos/checkpoint-zumbi-capitulo-04-cristina-sem-internet-e-sem-plano.html'],
+        ["Capítulo 5: A Casa De Seu Augusto", "capitulos/checkpoint-zumbi-capitulo-05-a-casa-de-seu-augusto.html"]]
     }
   ];
 
