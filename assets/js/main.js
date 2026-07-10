@@ -298,6 +298,15 @@ const ratingBlocks = document.querySelectorAll('[data-chapter-rating]');
 if (ratingBlocks.length) {
   const readerIdKey = 'arquivoVermelho.readerId.v1';
   const ratingsKey = 'arquivoVermelho.chapterRatings.v1';
+  const ratingsSyncKey = 'arquivoVermelho.ratingSync.v1';
+  const ratingsEndpoint = 'https://script.google.com/macros/s/AKfycbyX3Z3bsVM7NwNpJaSxbn-pqjnKK6--iLoLDpdfD_0eZUVKtXaAvV-V7Ch4IXQnP70UVg/exec';
+  const workTitles = {
+    'a-hora-vermelha': 'A Hora Vermelha',
+    'cronicas': 'Crônicas',
+    'checkpoint-zumbi': 'Checkpoint Zumbi',
+    'o-ultimo-dia-original': 'O Último Dia — Original multilíngue',
+    'o-ultimo-dia-portugues': 'O Último Dia — 100% Português'
+  };
 
   const createReaderId = () => {
     if (window.crypto && window.crypto.randomUUID) {
@@ -325,7 +334,121 @@ if (ratingBlocks.length) {
     localStorage.setItem(ratingsKey, JSON.stringify(ratings));
   };
 
-  const formatRatingLabel = (rating) => rating === 0 ? '0 estrela' : `${rating} ${rating === 1 ? 'estrela' : 'estrelas'}`;
+  const getWorkId = (ratingId) => {
+    if (ratingId.startsWith('obra-')) {
+      return ratingId.slice(5);
+    }
+
+    if (ratingId.startsWith('o-ultimo-dia-portugues-')) {
+      return 'o-ultimo-dia-portugues';
+    }
+
+    if (ratingId.startsWith('o-ultimo-dia-')) {
+      return 'o-ultimo-dia-original';
+    }
+
+    if (ratingId.startsWith('a-hora-vermelha-')) {
+      return 'a-hora-vermelha';
+    }
+
+    if (ratingId.startsWith('cronicas-')) {
+      return 'cronicas';
+    }
+
+    if (ratingId.startsWith('checkpoint-zumbi-')) {
+      return 'checkpoint-zumbi';
+    }
+
+    return ratingId;
+  };
+
+  const formatRatingLabel = (rating) => {
+    const display = Number.isInteger(rating) ? String(rating) : rating.toFixed(1).replace('.', ',');
+    return `${display} ${rating === 1 ? 'estrela' : 'estrelas'}`;
+  };
+
+  const getRatingTarget = (block) => {
+    const ratingId = block.dataset.chapterRating || window.location.pathname;
+    const isWork = ratingId.startsWith('obra-');
+    const workId = getWorkId(ratingId);
+    const pageTitle = document.querySelector('h1')?.textContent?.replace(/\s+/g, ' ').trim() || '';
+
+    return {
+      id: ratingId,
+      type: isWork ? 'work' : 'chapter',
+      workId,
+      workTitle: workTitles[workId] || pageTitle,
+      chapterId: isWork ? '' : ratingId,
+      chapterTitle: isWork ? '' : pageTitle
+    };
+  };
+
+  const getSyncState = () => {
+    try {
+      return JSON.parse(localStorage.getItem(ratingsSyncKey)) || {};
+    } catch {
+      return {};
+    }
+  };
+
+  const markSynced = (target, ratedAt) => {
+    const state = getSyncState();
+    state[target.id] = ratedAt;
+    localStorage.setItem(ratingsSyncKey, JSON.stringify(state));
+  };
+
+  const loadSummary = (target) => new Promise((resolve, reject) => {
+    const callbackName = `arquivoVermelhoRating_${Date.now()}_${Math.random().toString(16).slice(2)}`;
+    const script = document.createElement('script');
+    const cleanup = () => {
+      delete window[callbackName];
+      script.remove();
+    };
+    const params = new URLSearchParams({
+      action: 'summary',
+      type: target.type,
+      workId: target.workId,
+      chapterId: target.chapterId,
+      callback: callbackName
+    });
+
+    window[callbackName] = (response) => {
+      cleanup();
+      if (response?.ok) {
+        resolve(response.summary);
+        return;
+      }
+      reject(new Error(response?.error || 'Não foi possível carregar as avaliações.'));
+    };
+
+    script.src = `${ratingsEndpoint}?${params.toString()}`;
+    script.async = true;
+    script.onerror = () => {
+      cleanup();
+      reject(new Error('Não foi possível carregar as avaliações.'));
+    };
+    document.head.append(script);
+  });
+
+  const submitRating = async (target, rating) => {
+    const body = new URLSearchParams({
+      action: 'rate',
+      type: target.type,
+      workId: target.workId,
+      workTitle: target.workTitle,
+      chapterId: target.chapterId,
+      chapterTitle: target.chapterTitle,
+      rating: String(rating),
+      readerId
+    });
+
+    await fetch(ratingsEndpoint, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+      body
+    });
+  };
 
   const getRatingSummary = (block) => {
     let summary = block.querySelector('[data-rating-summary]');
@@ -346,7 +469,7 @@ if (ratingBlocks.length) {
     return summary;
   };
 
-  const renderRatingSummary = (block, rating, count = 1) => {
+  const renderRatingSummary = (block, rating, count = 0) => {
     const summary = getRatingSummary(block);
 
     if (Number.isFinite(rating)) {
@@ -371,36 +494,79 @@ if (ratingBlocks.length) {
 
     if (message) {
       const label = formatRatingLabel(rating);
-      message.textContent = `Sua nota (${label}) foi salva neste dispositivo.`;
+      message.textContent = `Sua nota (${label}) está vinculada a este dispositivo.`;
     }
 
-    renderRatingSummary(block, rating);
+  };
+
+  const renderSummary = async (block, target) => {
+    try {
+      const summary = await loadSummary(target);
+      const average = summary.average === null ? Number.NaN : Number(summary.average);
+      renderRatingSummary(block, average, Number(summary.count));
+      return summary;
+    } catch {
+      renderRatingSummary(block, Number.NaN);
+      return null;
+    }
+  };
+
+  const waitForSummary = async (block, target, minimumCount = 1) => {
+    for (let attempt = 0; attempt < 3; attempt += 1) {
+      await new Promise((resolve) => window.setTimeout(resolve, attempt ? 700 : 500));
+
+      const summary = await renderSummary(block, target);
+      if (summary && summary.count >= minimumCount) {
+        return summary;
+      }
+    }
+
+    return null;
   };
 
   ratingBlocks.forEach((block) => {
-    const chapterId = block.dataset.chapterRating || window.location.pathname;
+    const target = getRatingTarget(block);
     const buttons = block.querySelectorAll('[data-rating-value]');
     const ratings = readRatings();
-    const saved = ratings[chapterId];
+    const saved = ratings[target.id];
+    const description = block.querySelector('p:not([data-rating-message]):not([data-rating-summary])');
+
+    if (description) {
+      description.textContent = 'A nota é associada anonimamente a este dispositivo. A média é pública e não exige login.';
+    }
 
     if (saved && saved.readerId === readerId) {
       renderSavedState(block, Number(saved.rating));
+      const syncState = getSyncState();
+
+      if (syncState[target.id] !== saved.ratedAt) {
+        submitRating(target, Number(saved.rating))
+          .then(() => waitForSummary(block, target))
+          .then((summary) => {
+            if (summary) {
+              markSynced(target, saved.ratedAt);
+            }
+          })
+          .catch(() => null);
+      } else {
+        renderSummary(block, target);
+      }
       return;
     }
 
-    renderRatingSummary(block, Number.NaN);
+    renderSummary(block, target);
 
     buttons.forEach((button) => {
-      button.addEventListener('click', () => {
+      button.addEventListener('click', async () => {
         const rating = Number(button.dataset.ratingValue);
         const currentRatings = readRatings();
 
-        if (currentRatings[chapterId] && currentRatings[chapterId].readerId === readerId) {
-          renderSavedState(block, Number(currentRatings[chapterId].rating));
+        if (currentRatings[target.id] && currentRatings[target.id].readerId === readerId) {
+          renderSavedState(block, Number(currentRatings[target.id].rating));
           return;
         }
 
-        currentRatings[chapterId] = {
+        currentRatings[target.id] = {
           rating,
           readerId,
           ratedAt: new Date().toISOString()
@@ -408,6 +574,28 @@ if (ratingBlocks.length) {
 
         writeRatings(currentRatings);
         renderSavedState(block, rating);
+
+        const message = block.querySelector('[data-rating-message]');
+        if (message) {
+          message.textContent = 'Registrando sua nota...';
+        }
+
+        try {
+          await submitRating(target, rating);
+          const summary = await waitForSummary(block, target);
+          if (!summary) {
+            throw new Error('A avaliação ainda não foi confirmada.');
+          }
+
+          markSynced(target, currentRatings[target.id].ratedAt);
+          if (message) {
+            message.textContent = `Sua nota (${formatRatingLabel(rating)}) foi registrada.`;
+          }
+        } catch {
+          if (message) {
+            message.textContent = 'Sua nota foi salva neste dispositivo e será enviada quando a conexão estiver disponível.';
+          }
+        }
       });
     });
   });
