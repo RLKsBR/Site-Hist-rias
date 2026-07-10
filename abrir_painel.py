@@ -6,6 +6,8 @@ import http.server
 import base64
 from datetime import datetime, timezone
 import json
+import secrets
+import subprocess
 import threading
 import tkinter as tk
 import webbrowser
@@ -16,6 +18,7 @@ from urllib.parse import parse_qs, urlparse
 
 ROOT = Path(__file__).resolve().parent
 PANEL_PATH = "/admin-local/"
+PUBLISH_TOKEN = secrets.token_urlsafe(32)
 
 
 class PanelRequestHandler(http.server.SimpleHTTPRequestHandler):
@@ -34,9 +37,16 @@ class PanelRequestHandler(http.server.SimpleHTTPRequestHandler):
         if request.path == "/api/analytics":
             self._send_json(self._analytics())
             return
+        if request.path == "/api/config":
+            self._send_json({"publishToken": PUBLISH_TOKEN})
+            return
         super().do_GET()
 
     def do_POST(self) -> None:
+        if self.path == "/api/publish":
+            self._publish()
+            return
+
         if self.path not in {"/api/write-text", "/api/write-binary"}:
             self.send_error(404, "Rota nao encontrada.")
             return
@@ -76,13 +86,65 @@ class PanelRequestHandler(http.server.SimpleHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
 
-    def _send_json(self, data: dict) -> None:
+    def _send_json(self, data: dict, status: int = 200) -> None:
         body = json.dumps(data, ensure_ascii=False).encode("utf-8")
-        self.send_response(200)
+        self.send_response(status)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
         self.wfile.write(body)
+
+    def _run_git(self, *arguments: str) -> str:
+        try:
+            result = subprocess.run(
+                ["git", *arguments],
+                cwd=ROOT,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=60,
+                check=False,
+            )
+        except OSError as error:
+            raise RuntimeError("Não encontrei o Git neste computador.") from error
+        except subprocess.TimeoutExpired as error:
+            raise RuntimeError("O Git demorou demais para responder. Tente novamente.") from error
+
+        if result.returncode:
+            detail = (result.stderr or result.stdout).strip()
+            raise RuntimeError(detail or "O Git não conseguiu concluir a publicação.")
+
+        return result.stdout.strip()
+
+    def _publish(self) -> None:
+        if self.headers.get("X-Panel-Token") != PUBLISH_TOKEN:
+            self._send_json({"ok": False, "error": "Solicitação de publicação inválida."}, 403)
+            return
+
+        try:
+            self._run_git("fetch", "origin", "main")
+            ahead, behind = self._run_git("rev-list", "--left-right", "--count", "main...origin/main").split()
+
+            if int(behind):
+                raise RuntimeError("O GitHub tem alterações mais novas. Atualize o repositório antes de publicar.")
+
+            if not self._run_git("status", "--porcelain"):
+                self._send_json({"ok": True, "published": False, "message": "Nenhuma alteração local para publicar."})
+                return
+
+            self._run_git("add", "--all")
+            self._run_git("commit", "-m", "Publica atualização pelo painel local")
+            self._run_git("push", "origin", "main")
+            revision = self._run_git("rev-parse", "--short", "HEAD")
+            self._send_json({
+                "ok": True,
+                "published": True,
+                "revision": revision,
+                "message": "Alterações enviadas ao GitHub. O GitHub Pages começará a atualizar em seguida.",
+            })
+        except RuntimeError as error:
+            self._send_json({"ok": False, "error": str(error)}, 400)
 
     def _analytics(self) -> dict:
         downloads = ROOT / "downloads"

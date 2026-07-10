@@ -156,7 +156,8 @@ if (!nativeApp) {
             ['Capítulo 2: Dia 1', 'capitulos/o-ultimo-dia-capitulo-02-dia-1.html'],
             ['Capítulo 3: Dia 2', 'capitulos/o-ultimo-dia-capitulo-03-dia-2.html'],
             ['Capítulo 4: Dia 3', 'capitulos/o-ultimo-dia-capitulo-04-dia-3.html'],
-            ['Capítulo 5: Dia 4', 'capitulos/o-ultimo-dia-capitulo-05-dia-4.html']
+            ['Capítulo 5: Dia 4', 'capitulos/o-ultimo-dia-capitulo-05-dia-4.html'],
+            ['Capítulo 6: Dia 5', 'capitulos/o-ultimo-dia-capitulo-06-dia-5.html']
           ]
         },
         {

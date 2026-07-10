@@ -73,7 +73,8 @@ const WORKS = {
 };
 
 const state = {
-  preview: null
+  preview: null,
+  publishToken: null
 };
 
 const $ = (selector) => document.querySelector(selector);
@@ -153,6 +154,17 @@ async function readText(path) {
     throw new Error(await response.text());
   }
   return response.text();
+}
+
+function escapeRegex(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function normalizeTitle(value, config, numberLabel) {
+  const original = String(value).trim();
+  const prefix = new RegExp(`^${escapeRegex(config.unit)}\\s+${escapeRegex(numberLabel)}(?:\\s*[:.\\-—–]\\s*|\\s+)`, "i");
+  const normalized = original.replace(prefix, "").trim();
+  return normalized || original;
 }
 
 function formatBytes(bytes) {
@@ -245,6 +257,33 @@ async function writeBinary(path, file) {
   }
 }
 
+async function publishToGithub() {
+  if (!state.publishToken) {
+    const configResponse = await fetch("/api/config");
+    if (!configResponse.ok) {
+      throw new Error("Não consegui preparar a publicação no GitHub.");
+    }
+    const config = await configResponse.json();
+    state.publishToken = config.publishToken;
+  }
+
+  const response = await fetch("/api/publish", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Panel-Token": state.publishToken
+    },
+    body: "{}"
+  });
+  const result = await response.json();
+
+  if (!response.ok || !result.ok) {
+    throw new Error(result.error || "Não foi possível publicar no GitHub.");
+  }
+
+  return result;
+}
+
 function selectedWorkConfig() {
   const work = WORKS[workSelect.value];
   if (!work) {
@@ -261,10 +300,12 @@ function selectedWorkConfig() {
     throw new Error("Versão inválida.");
   }
 
+  const { label: versionLabel, ...versionConfig } = version;
+
   return {
     work,
     version: versionKey,
-    config: { ...work, ...version, versionKey, versionLabel: version.label }
+    config: { ...work, ...versionConfig, versionKey, versionLabel }
   };
 }
 
@@ -293,18 +334,19 @@ function buildPublicationData() {
   }
 
   const number = Number(data.get("number"));
-  const title = String(data.get("title") || "").trim();
+  const rawTitle = String(data.get("title") || "").trim();
   const summary = String(data.get("summary") || "").trim() || "Publicação em PDF gratuito para leitura no Arquivo Vermelho.";
 
   if (!Number.isInteger(number) || number < 1) {
     throw new Error("Informe um número de capítulo válido.");
   }
 
-  if (!title) {
+  if (!rawTitle) {
     throw new Error("Informe o título.");
   }
 
   const numberLabel = config.useRoman ? roman(number) : String(number);
+  const title = normalizeTitle(rawTitle, config, numberLabel);
   const fullTitle = `${config.unit} ${numberLabel}: ${title}`;
   const slug = slugify(title);
   const fileSlug = `${config.pagePrefix}-${pad2(number)}-${slug}`;
@@ -545,7 +587,6 @@ function updateSidebar(html, data) {
     return html;
   }
 
-  const entry = `        ["${data.fullTitle}", "${data.htmlPath}"]`;
   const titleAnchor = data.work.label.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
   const titleMatch = html.match(new RegExp(`title:\\s*["']${titleAnchor}["']`));
   const sectionStart = titleMatch ? titleMatch.index : -1;
@@ -553,16 +594,47 @@ function updateSidebar(html, data) {
     throw new Error("Não encontrei a obra na barra lateral.");
   }
 
-  const prefixStart = html.indexOf(data.config.pagePrefix, sectionStart);
-  if (prefixStart === -1) {
+  let chaptersStart = html.indexOf("chapters:", sectionStart);
+
+  if (data.config.versionLabel) {
+    const versionAnchor = data.config.versionLabel.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const versionMatch = html.slice(sectionStart).match(new RegExp(`label:\\s*["']${versionAnchor}["']`));
+    if (!versionMatch || versionMatch.index === undefined) {
+      throw new Error("Não encontrei a versão correta na barra lateral.");
+    }
+    chaptersStart = html.indexOf("chapters:", sectionStart + versionMatch.index);
+  }
+
+  if (chaptersStart === -1) {
     throw new Error("Não encontrei a lista correta na barra lateral.");
   }
 
-  const listEnd = html.indexOf("\n      ]", prefixStart);
+  const listStart = html.indexOf("[", chaptersStart);
+  if (listStart === -1) {
+    throw new Error("Não encontrei o início da lista na barra lateral.");
+  }
+
+  let depth = 0;
+  let listEnd = -1;
+  for (let index = listStart; index < html.length; index += 1) {
+    if (html[index] === "[") {
+      depth += 1;
+    } else if (html[index] === "]") {
+      depth -= 1;
+      if (!depth) {
+        listEnd = index;
+        break;
+      }
+    }
+  }
+
   if (listEnd === -1) {
     throw new Error("Não encontrei o fim da lista na barra lateral.");
   }
 
+  const listContents = html.slice(listStart + 1, listEnd);
+  const indentation = listContents.match(/\n(\s+)\[/)?.[1] || "        ";
+  const entry = `${indentation}["${data.fullTitle}", "${data.htmlPath}"]`;
   const before = html.slice(0, listEnd).replace(/,?\s*$/, ",");
   const after = html.slice(listEnd);
   return `${before}\n${entry}${after}`;
@@ -718,7 +790,15 @@ form.addEventListener("submit", async (event) => {
       await applyAdd(data);
     }
 
-    log("Processo concluído. Revise o site, depois faça commit e push.", "ok");
+    setStatus("Enviando ao GitHub...", "Criando commit e acionando o GitHub Pages.");
+    const publication = await publishToGithub();
+    if (publication.published) {
+      log(`Publicado no GitHub no commit <code>${escapeHtml(publication.revision)}</code>.`, "ok");
+      setStatus("Publicação enviada.", publication.message);
+    } else {
+      log(publication.message, "warn");
+      setStatus("Sem alterações novas.", publication.message);
+    }
   } catch (error) {
     log(escapeHtml(error.message), "error");
   }

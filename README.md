@@ -54,7 +54,7 @@ Ele roda no navegador, pede acesso à pasta local do repositório e pode:
 - atualizar `sitemap.xml`;
 - tentar liberar o botão "Próximo capítulo" no capítulo anterior.
 
-O painel não publica no GitHub sozinho. Depois de usar, revise o site localmente e faça commit/push.
+Ao clicar em "Publicar no GitHub", o painel cria ou atualiza os arquivos, faz o commit, envia para a branch `main` e aciona o GitHub Pages. O Git precisa estar instalado e já autenticado para esse repositório neste computador. Se o GitHub tiver mudanças mais novas que as locais, o painel interrompe a publicação e informa o motivo, sem forçar nada.
 
 ### Abrir sem PowerShell
 
