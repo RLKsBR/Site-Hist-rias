@@ -1,18 +1,20 @@
 (() => {
   const measurementId = 'G-TG69DXZH3R';
-  const alreadyLoaded = Array.from(document.scripts).some((script) => script.src.includes(measurementId));
 
+  if (window.__arquivoVermelhoAnalyticsLoaded) {
+    return;
+  }
+
+  window.__arquivoVermelhoAnalyticsLoaded = true;
   window.dataLayer = window.dataLayer || [];
   window.gtag = window.gtag || function gtag() {
     window.dataLayer.push(arguments);
   };
 
-  if (!alreadyLoaded) {
-    const script = document.createElement('script');
-    script.async = true;
-    script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
-    document.head.appendChild(script);
-  }
+  const script = document.createElement('script');
+  script.async = true;
+  script.src = `https://www.googletagmanager.com/gtag/js?id=${measurementId}`;
+  document.head.appendChild(script);
 
   window.gtag('js', new Date());
   window.gtag('config', measurementId);
