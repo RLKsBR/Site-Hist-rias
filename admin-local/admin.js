@@ -424,6 +424,7 @@ function chapterPageTemplate(data, previous, next) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script defer src="../assets/js/analytics.js?v=20260710"></script>
   <title>${escapeHtml(data.config.label)}${escapeHtml(versionTitle)} | ${escapeHtml(data.fullTitle)}</title>
   <meta name="description" content="${escapeHtml(data.fullTitle)} disponível em PDF gratuito no Arquivo Vermelho.">
   <meta property="og:title" content="${escapeHtml(data.config.label)} | ${escapeHtml(data.fullTitle)}">
