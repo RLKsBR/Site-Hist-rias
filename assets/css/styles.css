@@ -351,10 +351,10 @@ h3 {
 }
 
 .work-card {
-  min-height: 280px;
+  min-height: 304px;
   display: grid;
   align-content: end;
-  padding: 18px;
+  padding: 21px;
   border: 1px solid var(--line);
   border-radius: var(--radius);
   position: relative;
@@ -389,6 +389,11 @@ h3 {
   border-color: rgba(226, 74, 82, 0.6);
 }
 
+.work-card:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 3px;
+}
+
 .work-card:hover::before {
   transform: scale(1.03);
   opacity: 0.82;
@@ -397,6 +402,30 @@ h3 {
 .work-card > * {
   position: relative;
   z-index: 1;
+}
+
+.work-card h3 {
+  margin-top: 6px;
+  font-size: 1.55rem;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.65);
+}
+
+.work-card-action {
+  width: fit-content;
+  margin-top: 16px;
+  padding: 9px 13px;
+  border: 1px solid rgba(226, 74, 82, 0.72);
+  border-radius: 6px;
+  background: rgba(184, 50, 58, 0.88);
+  color: #fff3e6;
+  font-family: system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.work-card:hover .work-card-action {
+  background: var(--accent-strong);
 }
 
 .cover-a-hora-vermelha {
