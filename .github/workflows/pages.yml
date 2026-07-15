@@ -31,7 +31,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir -p public
-          cp -R assets capitulos downloads leituras obras public/
+          cp -R assets capitulos downloads jogos leituras obras public/
           cp *.html robots.txt sitemap.xml .nojekyll public/
 
       - name: Upload static site
