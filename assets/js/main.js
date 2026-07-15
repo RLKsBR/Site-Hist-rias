@@ -290,6 +290,22 @@ if (!nativeApp) {
     sidebar.append(details);
   });
 
+  const gamesTitle = document.createElement('p');
+  gamesTitle.className = 'library-sidebar-title library-sidebar-title--games';
+  gamesTitle.textContent = 'Jogos';
+  sidebar.append(gamesTitle);
+
+  const gameLink = document.createElement('a');
+  gameLink.className = 'library-game-link';
+  gameLink.href = toUrl('jogos/espaco-mortal-jardim-de-sangue-frio.html');
+  gameLink.textContent = 'Espaço Mortal — Jardim de Sangue-Frio';
+
+  if (isCurrent('jogos/espaco-mortal-jardim-de-sangue-frio.html')) {
+    gameLink.setAttribute('aria-current', 'page');
+  }
+
+  sidebar.append(gameLink);
+
   document.body.prepend(sidebar);
   document.body.classList.add('has-library-sidebar');
 }

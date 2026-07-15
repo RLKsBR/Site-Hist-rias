@@ -1515,3 +1515,118 @@ body.pdf-reader-fullscreen-active .reader > :not(.pdf-reader-panel) {
     background: rgba(184, 50, 58, 0.16);
   }
 }
+
+.game-release-panel {
+  display: grid;
+  gap: 22px;
+}
+
+.game-release-panel h2,
+.game-release-panel h3 {
+  margin-bottom: 0;
+}
+
+.beta-badge {
+  display: inline-flex;
+  width: fit-content;
+  padding: 5px 9px;
+  border: 1px solid rgba(226, 74, 82, 0.7);
+  border-radius: 999px;
+  background: rgba(184, 50, 58, 0.14);
+  color: #fff5eb;
+  font-family: system-ui, sans-serif;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.game-download-grid,
+.game-info-grid {
+  display: grid;
+  gap: 16px;
+}
+
+.game-download {
+  min-height: 100%;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: rgba(17, 12, 11, 0.72);
+}
+
+.game-download h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.game-download p {
+  margin: 7px 0 14px;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+.game-download .button {
+  width: 100%;
+}
+
+.game-info-grid .panel {
+  height: 100%;
+}
+
+.game-info-grid ul,
+.game-notes {
+  margin: 10px 0 0;
+  padding-left: 1.2rem;
+}
+
+.game-info-grid li + li,
+.game-notes li + li {
+  margin-top: 7px;
+}
+
+.game-warning {
+  border-left: 3px solid var(--gold);
+  background: rgba(72, 52, 25, 0.22);
+}
+
+.release-link {
+  color: var(--gold);
+  font-family: system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+
+@media (min-width: 720px) {
+  .game-download-grid,
+  .game-info-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1280px) {
+  .library-game-link {
+    display: block;
+    margin: 0;
+    padding: 8px;
+    border-top: 1px solid rgba(198, 161, 91, 0.14);
+    border-bottom: 1px solid rgba(198, 161, 91, 0.14);
+    border-radius: 6px;
+    color: var(--text);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1.35;
+    text-decoration: none;
+  }
+
+  .library-sidebar-title--games {
+    margin-top: 22px;
+  }
+
+  .library-game-link:hover,
+  .library-game-link[aria-current="page"] {
+    color: var(--text);
+    background: rgba(184, 50, 58, 0.16);
+  }
+}
