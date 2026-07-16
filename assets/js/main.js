@@ -199,7 +199,15 @@ if (!nativeApp) {
       href: 'obras/espaco-mortal/',
       chapters: [
         ['Capítulo 1: A Ideia de Íris', 'capitulos/espaco-mortal-capitulo-01-a-ideia-de-iris.html'],
-        ['Capítulo 2: A Sábia Preto', 'capitulos/espaco-mortal-capitulo-02-a-sabia-preto.html']
+        ['Capítulo 2: A Sábia Preto', 'capitulos/espaco-mortal-capitulo-02-a-sabia-preto.html'],
+        ['Capítulo 3: O Asteroide de Íris', 'capitulos/espaco-mortal-capitulo-03-o-asteroide-de-iris.html'],
+        ['Capítulo 4: A Frota Quer Comprar', 'capitulos/espaco-mortal-capitulo-04-a-frota-quer-comprar.html'],
+        ['Capítulo 5: Problema Regularizado', 'capitulos/espaco-mortal-capitulo-05-problema-regularizado.html'],
+        ['Capítulo 6: O Comboio', 'capitulos/espaco-mortal-capitulo-06-o-comboio.html'],
+        ['Capítulo 7: Silêncio de Assinatura', 'capitulos/espaco-mortal-capitulo-07-silencio-de-assinatura.html'],
+        ['Capítulo 8: As Cápitas', 'capitulos/espaco-mortal-capitulo-08-as-capitas.html'],
+        ['Capítulo 9: Linha de Ruptura', 'capitulos/espaco-mortal-capitulo-09-linha-de-ruptura.html'],
+        ['Capítulo 10', 'capitulos/espaco-mortal-capitulo-10.html']
       ]
     }
   ];
