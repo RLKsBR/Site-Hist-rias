@@ -207,7 +207,7 @@ if (!nativeApp) {
         ['Capítulo 7: Silêncio de Assinatura', 'capitulos/espaco-mortal-capitulo-07-silencio-de-assinatura.html'],
         ['Capítulo 8: As Cápitas', 'capitulos/espaco-mortal-capitulo-08-as-capitas.html'],
         ['Capítulo 9: Linha de Ruptura', 'capitulos/espaco-mortal-capitulo-09-linha-de-ruptura.html'],
-        ['Capítulo 10', 'capitulos/espaco-mortal-capitulo-10.html']
+        ['Capítulo 10: Jardim de Sangue-Frio', 'capitulos/espaco-mortal-capitulo-10.html']
       ]
     }
   ];
