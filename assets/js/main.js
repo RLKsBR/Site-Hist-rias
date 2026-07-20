@@ -112,18 +112,6 @@ document.querySelectorAll('[data-contact-form]').forEach((form) => {
 
 const nativeApp = window.ArquivoVermelhoApp;
 
-const appMainScript = document.currentScript || document.querySelector('script[src*="assets/js/main.js"]');
-const appSiteRoot = appMainScript ? new URL('../../', appMainScript.src) : new URL('./', window.location.href);
-
-if (siteNav && !siteNav.querySelector('.mobile-games-link')) {
-  const gamesLink = document.createElement('a');
-  gamesLink.className = 'mobile-games-link';
-  gamesLink.href = new URL('jogos/', appSiteRoot).pathname;
-  gamesLink.textContent = 'Jogos';
-  const appLink = siteNav.querySelector('.mobile-app-link');
-  siteNav.insertBefore(gamesLink, appLink || null);
-}
-
 if (nativeApp && typeof nativeApp.checkForUpdates === 'function') {
   document.documentElement.classList.add('is-native-app');
 
@@ -310,6 +298,8 @@ if (!nativeApp) {
     sidebar.append(details);
   });
 
+  /* A seção de jogos não faz parte da navegação pública. */
+  /*
   const gamesTitle = document.createElement('p');
   gamesTitle.className = 'library-sidebar-title library-sidebar-title--games';
   gamesTitle.textContent = 'Jogos';
@@ -325,6 +315,7 @@ if (!nativeApp) {
   }
 
   sidebar.append(gameLink);
+  */
 
   document.body.prepend(sidebar);
   document.body.classList.add('has-library-sidebar');
